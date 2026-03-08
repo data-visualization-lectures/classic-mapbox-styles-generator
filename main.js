@@ -1,4 +1,80 @@
 
+// i18next initialization
+i18next.init({
+    lng: navigator.language.startsWith('ja') ? 'ja' : 'en',
+    fallbackLng: 'en',
+    resources: {
+        ja: {
+            translation: {
+                pageTitle: 'Mapbox Classic スタイル生成',
+                mainTitle: 'Mapbox Classic スタイル生成',
+                mainDesc: 'トークンを入力し、スタイルを選んでください。Mapbox Classic スタイル用の「JSONファイル取得のためのURL」を生成します。',
+                tokenLabel: 'トークン（TOKEN）',
+                styleLabel: '地図タイル（クラシック・スタイル）',
+                styleSelect: 'スタイルを選択してください',
+                previewLabel: 'スタイル プレビュー',
+                generateBtn: 'URL を生成',
+                urlLabel: '生成された URL',
+                downloadBtnLabel: 'JSON をダウンロード',
+                linksTitle: '関連リンク',
+                linkClassicStyles: 'クラシック・スタイルの紹介',
+                linkAccessTokens: 'トークンの取得ページ',
+                csvLoadError: 'CSV を読み込めませんでした。',
+                tokenAndStyleRequired: 'トークンとスタイルを入力してください。',
+                previewLoadError: 'プレビュー画像を読み込めませんでした。',
+                generateUrlFirst: '先に URL を生成してください。',
+                downloading: 'ダウンロード中...',
+                jsonDownloadSuccess: 'JSON をダウンロードしました。',
+                jsonDownloadError: 'JSON の取得に失敗しました',
+                previewAlt: 'のプレビュー'
+            }
+        },
+        en: {
+            translation: {
+                pageTitle: 'Mapbox Classic Style Generator',
+                mainTitle: 'Mapbox Classic Style Generator',
+                mainDesc: 'Enter your token and select a style. This tool generates a URL for retrieving the JSON file for Mapbox Classic styles.',
+                tokenLabel: 'Token (TOKEN)',
+                styleLabel: 'Map Tile (Classic Style)',
+                styleSelect: 'Select a style',
+                previewLabel: 'Style Preview',
+                generateBtn: 'Generate URL',
+                urlLabel: 'Generated URL',
+                downloadBtnLabel: 'Download JSON',
+                linksTitle: 'Related Links',
+                linkClassicStyles: 'Introduction to Classic Styles',
+                linkAccessTokens: 'Get Access Tokens',
+                csvLoadError: 'Failed to load CSV.',
+                tokenAndStyleRequired: 'Please enter a token and select a style.',
+                previewLoadError: 'Failed to load preview image.',
+                generateUrlFirst: 'Please generate a URL first.',
+                downloading: 'Downloading...',
+                jsonDownloadSuccess: 'JSON downloaded successfully.',
+                jsonDownloadError: 'Failed to retrieve JSON',
+                previewAlt: ' preview'
+            }
+        }
+    }
+}, function() {
+    initializeUI();
+});
+
+function initializeUI() {
+    document.getElementById('pageTitle').textContent = i18next.t('pageTitle');
+    document.getElementById('mainTitle').textContent = i18next.t('mainTitle');
+    document.getElementById('mainDesc').textContent = i18next.t('mainDesc');
+    document.getElementById('tokenLabel').textContent = i18next.t('tokenLabel');
+    document.getElementById('styleLabel').textContent = i18next.t('styleLabel');
+    document.getElementById('styleSelect').textContent = i18next.t('styleSelect');
+    document.getElementById('previewLabel').textContent = i18next.t('previewLabel');
+    document.getElementById('generateBtn').textContent = i18next.t('generateBtn');
+    document.getElementById('urlLabel').textContent = i18next.t('urlLabel');
+    document.getElementById('download-btn').textContent = i18next.t('downloadBtnLabel');
+    document.getElementById('linksTitle').textContent = i18next.t('linksTitle');
+    document.getElementById('linkClassicStyles').textContent = i18next.t('linkClassicStyles');
+    document.getElementById('linkAccessTokens').textContent = i18next.t('linkAccessTokens');
+}
+
 const styleSelect = document.getElementById("style");
 const form = document.getElementById("generator-form");
 const message = document.getElementById("message");
@@ -13,7 +89,7 @@ async function loadStyles() {
     try {
         const response = await fetch("styles.csv");
         if (!response.ok) {
-            throw new Error("CSV を読み込めませんでした。");
+            throw new Error(i18next.t('csvLoadError'));
         }
         const csvText = await response.text();
         populateStyles(csvText);
@@ -52,7 +128,7 @@ function updatePreview(slug) {
     const name = selectedOption ? selectedOption.textContent.trim() : "";
     const imageSrc = `${previewBasePath}/${slug}.png`;
     previewImg.src = imageSrc;
-    previewImg.alt = `${name} のプレビュー`;
+    previewImg.alt = `${name}${i18next.t('previewAlt')}`;
     previewWrapper.hidden = false;
 }
 
@@ -67,7 +143,7 @@ form.addEventListener("submit", (event) => {
     updatePreview(slug);
 
     if (!token || !slug) {
-        message.textContent = "トークンとスタイルを入力してください。";
+        message.textContent = i18next.t('tokenAndStyleRequired');
         message.style.color = "#c62828";
         resultSection.hidden = true;
         downloadBtn.disabled = true;
@@ -95,27 +171,27 @@ styleSelect.addEventListener("change", (event) => {
 
 previewImg.addEventListener("error", () => {
     previewWrapper.hidden = true;
-    message.textContent = "プレビュー画像を読み込めませんでした。";
+    message.textContent = i18next.t('previewLoadError');
     message.style.color = "#c62828";
 });
 
 downloadBtn.addEventListener("click", async () => {
     const url = generatedUrlElem.textContent.trim();
     if (!url) {
-        message.textContent = "先に URL を生成してください。";
+        message.textContent = i18next.t('generateUrlFirst');
         message.style.color = "#c62828";
         return;
     }
 
     downloadBtn.disabled = true;
     const originalText = downloadBtn.textContent;
-    downloadBtn.textContent = "ダウンロード中...";
+    downloadBtn.textContent = i18next.t('downloading');
 
     try {
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(
-                `JSON の取得に失敗しました (HTTP ${response.status}).`
+                `${i18next.t('jsonDownloadError')} (HTTP ${response.status}).`
             );
         }
 
@@ -132,7 +208,7 @@ downloadBtn.addEventListener("click", async () => {
         anchor.remove();
         URL.revokeObjectURL(objectUrl);
 
-        message.textContent = "JSON をダウンロードしました。";
+        message.textContent = i18next.t('jsonDownloadSuccess');
         message.style.color = "#2e7d32";
         setTimeout(() => {
             message.textContent = "";
