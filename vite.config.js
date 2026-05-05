@@ -1,6 +1,7 @@
-export default {
-    build: {
-        outDir: 'docs',
-    },
-    base: './'
-}
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  build: {
+    outDir: 'dist',
+  },
+})
